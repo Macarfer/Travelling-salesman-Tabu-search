@@ -9,4 +9,5 @@
 void initWithoutRandom(const char * path);
 void initWithRandom(const char * path,const char * path2);
 void generateInitialSolution();
+void generateGreedyInitialSolution();
 void run();

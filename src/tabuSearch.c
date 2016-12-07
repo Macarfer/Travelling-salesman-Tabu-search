@@ -85,6 +85,26 @@ solutionNumber+=1;
 calculateInitialDistance();
 }
 
+void generateGreedyInitialSolution(){
+  int index0,index,asignations;
+  actualSolution[0]=0;
+  actualSolution[DIMENSION]=0;
+  int usedNumbers[DIMENSION]={0};
+  actualDistance = MAX_INT;
+  for(asignations=0;asignations<=numberOfCities;asignations++){
+    for(index=1;index<=numberOfCities;index++){
+      newDistance = distanceMatrix[actualSolution[asignations]][index];
+      if(newDistance < actualDistance && usedNumbers[index]==0){
+        index0=index;
+        actualDistance=newDistance;
+      }
+      }
+    usedNumbers[index0]=1;
+    actualSolution[asignations+1]=index0;
+    actualDistance = MAX_INT;
+  }
+  calculateInitialDistance();
+}
 
 void calculateInitialDistance(){
   int i=0,index01=0,index02=0;

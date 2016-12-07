@@ -8,12 +8,13 @@ int main(int argc, char const *argv[]) {
   switch (argc){
     case 2:
     initWithoutRandom(argv[1]);
-    generateInitialSolution();
+    generateGreedyInitialSolution();
     run();
     break;
     case 3:
     initWithRandom(argv[1],argv[2]);
     generateInitialSolution();
+    //generateInitialSolution();
     run();
     break;
     default:
