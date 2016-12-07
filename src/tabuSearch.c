@@ -1,13 +1,16 @@
 #include "tabuSearch.h"
+#define MAX_INT 2147483647
+
 
 int distanceMatrix[DIMENSION][DIMENSION];
 int swapMatrix[DIMENSION-1];
-int actualSolution[DIMENSION-1];
+int actualSolution[DIMENSION+1];
 int tabuMatrix[TENDENCYPARAMETER][TENDENCYPARAMETER]={0};
 int tabuList[TENDENCYPARAMETER][2];
-int bestNeighbor[DIMENSION-1];
-int solution[DIMENSION-1];
+int bestNeighbor[DIMENSION+1];
+int solution[DIMENSION+1];
 int solIterations=0;
+int iteration0Distance=0;
 int iterationsWithoutImprovement=0;
 int iterations=0;
 int bestIndex0;
@@ -31,13 +34,14 @@ float calculateRandom();
 short isvalueinarray(int val, int *arr, int size);
 void printActualSolution();
 void calculateInitialDistance();
-void swap(int * returnVector,int * vector,int index0,int index1);
+int * swap(int * returnVector,int * vector,int index0,int index1);
 void copyArray(int * hostArray, int * array,int size);
 void reorganizeTabuList();
 void printTabuList();
 void clearTabuList();
 void calculateNeighbors();
 void reinitializeTabuMatrix();
+void printArray(int * array,int size);
 
 void run(){
   printf("RECORRIDO INICIAL\n");
@@ -65,9 +69,9 @@ void initWithRandom(const char *path,const char * pathToRandom){
 }
 
 void generateInitialSolution(){
-int index=0,i,actualValue;
-
-  for(;index<numberOfCities;){
+int index=1,i,actualValue;
+actualSolution[0]=0;
+  for(;index<numberOfCities+1;){
     actualValue = 1 + floor(calculateRandom()*numberOfCities);
     for(;isvalueinarray(actualValue,actualSolution,numberOfCities);){
       actualValue+=1;
@@ -76,6 +80,7 @@ int index=0,i,actualValue;
     actualSolution[index]=actualValue;
     index+=1;
   }
+  actualSolution[DIMENSION]=0;
 solutionNumber+=1;
 calculateInitialDistance();
 }
@@ -83,8 +88,8 @@ calculateInitialDistance();
 
 void calculateInitialDistance(){
   int i=0,index01=0,index02=0;
-  actualDistance=distanceMatrix[0][actualSolution[0]];
-  for(i=0;i<numberOfCities;i++){
+  actualDistance=distanceMatrix[0][actualSolution[1]];
+  for(i=1;i<=numberOfCities;i++){
     index01=actualSolution[i];
     index02=actualSolution[i+1];
     actualDistance+=distanceMatrix[index01][index02];
@@ -94,6 +99,7 @@ void calculateInitialDistance(){
 }
 
 int calculateDistance(int * vector){
+  /*Modificala para sumar en funcion da distancia previa*/
   int i=0,index01=0,index02=0;
   newDistance=distanceMatrix[0][vector[0]];
   for(i=0;i<(numberOfCities-1);i++){
@@ -105,46 +111,71 @@ int calculateDistance(int * vector){
   return newDistance;
 }
 
+int calculateDistanceOptimized(int * vector,int index0,int index1){
+  newDistance=iteration0Distance;
+
+  newDistance-=distanceMatrix[vector[index0]][vector[index0-1]];
+
+  newDistance-=distanceMatrix[vector[index0]][vector[index0+1]];
+
+  newDistance-=distanceMatrix[vector[index1]][vector[index1-1]];
+
+  newDistance-=distanceMatrix[vector[index1]][vector[index1+1]];
+  vector[index1]=actualSolution[index0];
+  vector[index0]=actualSolution[index1];
+
+  newDistance+=distanceMatrix[vector[index0]][vector[index0-1]];
+  newDistance+=distanceMatrix[vector[index0]][vector[index0+1]];
+  newDistance+=distanceMatrix[vector[index1]][vector[index1-1]];
+
+  newDistance+=distanceMatrix[vector[index1]][vector[index1+1]];
+
+
+  return newDistance;
+}
+
 void calculateNeighbors(){
-  int line=0,index0,index1,jump,first,vector[numberOfCities];
+  int line=0,index0,index1,jump,first;//vector[DIMENSION+1]={0};
+  int * vector=malloc(sizeof(int)*(DIMENSION));
+  iteration0Distance=actualDistance;
+  vector[0]=0;
+  vector[DIMENSION]=0;
+  copyArray(vector,actualSolution,DIMENSION);
+  copyArray(bestNeighbor,actualSolution,DIMENSION);
+
   for(;line<MAXITERATIONS;){
-     index0=0;
-     index1=0;
-     line+=1;
-     jump=0;
+     index0=1;
+     index1=1;
+     line++;
+     jump=1;
      first=0;
-     for(;index0<=numberOfCities && index1<(numberOfCities-1);){
+     iteration0Distance=actualDistance;
+     for(;index0<=numberOfCities && index1<=(numberOfCities);){
        if (jump==index1){
          index0++;
-         index1=0;
+         index1=1;
          jump++;
        }
-       swap(vector,actualSolution,index0,index1);
        if(index0!=index1 && !tabuMatrix[index0][index1]){
-         //printf("Index0: %d\tIndex1: %d\n",index0,index1);
-         if(calculateDistance(vector)< actualDistance || !first){
-          first=1;
+         if(calculateDistanceOptimized(vector,index0,index1) < actualDistance || !first){
+          first++;
           actualDistance=newDistance;
-          copyArray(bestNeighbor,vector,numberOfCities);
           bestIndex0=index0;
           bestIndex1=index1;
        }
+       vector[index1]=actualSolution[index1];
+       vector[index0]=actualSolution[index0];
      }
-
        index1++;
      }
      iterations++;
-     copyArray(actualSolution,bestNeighbor,numberOfCities);
-    //  if(!tabuMatrix[bestIndex0][bestIndex1]){
-    //    tabuMatrix[bestIndex0][bestIndex1]=1;
-    //    tabuMatrix[bestIndex1][bestIndex0]=1;
-    //    tabuList[tabuCount][0]=bestIndex0;
-    //    tabuList[tabuCount][1]=bestIndex1;
-    //  }
-    //  tabuCount++;
 
+     bestNeighbor[bestIndex0]=actualSolution[bestIndex1];
+     bestNeighbor[bestIndex1]=actualSolution[bestIndex0];
+     copyArray(actualSolution,bestNeighbor,DIMENSION);
+     copyArray(vector,actualSolution,DIMENSION);
      if(actualDistance < minimalDistance){
-      copyArray(solution,bestNeighbor,numberOfCities);
+      copyArray(solution,actualSolution,DIMENSION);
       solIterations=iterations;
       minimalDistance=actualDistance;
       iterationsWithoutImprovement=0;
@@ -155,21 +186,13 @@ void calculateNeighbors(){
      /*===============================================*/
      /*               print zone                      */
      /*===============================================*/
-     printf("ITERACION: %d\n\tINTERCAMBIO: (%d, %d)\n",iterations,bestIndex0,bestIndex1);
+     printf("ITERACION: %d\n\tINTERCAMBIO: (%d, %d)\n",iterations,bestIndex0-1,bestIndex1-1);
      printActualSolution();
      printf("\tCOSTE (km): %d\n\tITERACIONES SIN MEJORA: %d\n\tLISTA TABU:\n",actualDistance,iterationsWithoutImprovement);
      if(tabuCount >= TENDENCYPARAMETER){
-      //  printf("--------------------------\n");
-      //  printTabuList();
-
       tabuMatrix[tabuList[0][0]][tabuList[0][1]]=0;
       tabuMatrix[tabuList[0][1]][tabuList[0][0]]=0;
       reorganizeTabuList();
-        // printf("--------------------------\n");
-        // printTabuList();
-        //
-        // printf("--------------------------\n");
-        //getchar();
       tabuCount--;
      }
      if(!tabuMatrix[bestIndex0][bestIndex1]){
@@ -181,12 +204,13 @@ void calculateNeighbors(){
      tabuCount++;
 
      printTabuList();
-
      if(iterationsWithoutImprovement == MAXITERATIONSWITHOUTIMPROVEMENT){
-       printf("\n***************\nREINICIO: %d\n***************\n",restart);
+      printf("\n***************\nREINICIO: %d\n***************\n",restart);
        clearTabuList();
        iterationsWithoutImprovement=0;
-       copyArray(actualSolution,solution,numberOfCities);
+       copyArray(actualSolution,solution,DIMENSION);
+       copyArray(vector,solution,DIMENSION);
+       copyArray(bestNeighbor,solution,DIMENSION);
        actualDistance=minimalDistance;
        tabuCount=0;
        restart+=1;
@@ -198,14 +222,11 @@ void calculateNeighbors(){
 
 /*Auxiliar functions*/
 
-void swap(int * returnVector,int * vector,int index0,int index1){
-  int i;
-  for(i=0;i<numberOfCities;i++){
-    returnVector[i]=vector[i];
-  }
+int * swap(int * returnVector,int * vector,int index0,int index1){
   returnVector[index0] = vector[index1];
   returnVector[index1] = vector[index0];
   swapArrayCount++;
+  return returnVector;
 
 }
 short isvalueinarray(int val, int *arr, int size){
@@ -219,7 +240,7 @@ short isvalueinarray(int val, int *arr, int size){
 
 void copyArray(int * hostArray,int * array,int size){
   int i=0;
-  for(i=0;i<size;i++)
+  for(i=0;i<=size;i++)
     hostArray[i]=array[i];
 }
 
@@ -235,12 +256,10 @@ float calculateRandom(){
 
 void reorganizeTabuList(){
   int i;
-  for(i=1;i<=TENDENCYPARAMETER;i++){
+  for(i=1;i<TENDENCYPARAMETER;i++){
     tabuList[i-1][0]=tabuList[i][0];
     tabuList[i-1][1]=tabuList[i][1];
   }
-  // tabuList[i][0]=0;
-  // tabuList[i][1]=0;
 }
 void clearTabuList(){
   int i;
@@ -260,7 +279,7 @@ void reinitializeTabuMatrix(){
 void printTabuList(){
   int i;
   for(i=0;i<tabuCount;i++){
-    printf("\t%d %d\n",tabuList[i][0],tabuList[i][1]);
+    printf("\t%d %d\n",tabuList[i][0]-1,tabuList[i][1]-1);
   }
 }
 void printMatrix(){
@@ -276,7 +295,15 @@ void printMatrix(){
 void printActualSolution(){
   int i;
   printf("\tRECORRIDO: ");
-  for(i=0;i<numberOfCities;i++)
+  for(i=1;i<=numberOfCities;i++)
     printf("%d ",actualSolution[i]);
+  printf("\n");
+}
+
+void printArray(int * array,int size){
+  int i;
+  printf("\tRECORRIDO: ");
+  for(i=0;i<=size;i++)
+    printf("%d ",array[i]);
   printf("\n");
 }
