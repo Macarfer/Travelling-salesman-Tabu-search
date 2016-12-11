@@ -121,7 +121,6 @@ void calculateNeighbors(){
        }
        swap(vector,actualSolution,index0,index1);
        if(index0!=index1 && !tabuMatrix[index0][index1]){
-         //printf("Index0: %d\tIndex1: %d\n",index0,index1);
          if(calculateDistance(vector)< actualDistance || !first){
           first=1;
           actualDistance=newDistance;
@@ -135,13 +134,6 @@ void calculateNeighbors(){
      }
      iterations++;
      copyArray(actualSolution,bestNeighbor,numberOfCities);
-    //  if(!tabuMatrix[bestIndex0][bestIndex1]){
-    //    tabuMatrix[bestIndex0][bestIndex1]=1;
-    //    tabuMatrix[bestIndex1][bestIndex0]=1;
-    //    tabuList[tabuCount][0]=bestIndex0;
-    //    tabuList[tabuCount][1]=bestIndex1;
-    //  }
-    //  tabuCount++;
 
      if(actualDistance < minimalDistance){
       copyArray(solution,bestNeighbor,numberOfCities);
@@ -159,17 +151,9 @@ void calculateNeighbors(){
      printActualSolution();
      printf("\tCOSTE (km): %d\n\tITERACIONES SIN MEJORA: %d\n\tLISTA TABU:\n",actualDistance,iterationsWithoutImprovement);
      if(tabuCount >= TENDENCYPARAMETER){
-      //  printf("--------------------------\n");
-      //  printTabuList();
-
       tabuMatrix[tabuList[0][0]][tabuList[0][1]]=0;
       tabuMatrix[tabuList[0][1]][tabuList[0][0]]=0;
       reorganizeTabuList();
-        // printf("--------------------------\n");
-        // printTabuList();
-        //
-        // printf("--------------------------\n");
-        //getchar();
       tabuCount--;
      }
      if(!tabuMatrix[bestIndex0][bestIndex1]){
@@ -234,13 +218,11 @@ float calculateRandom(){
 
 
 void reorganizeTabuList(){
-  int i;
-  for(i=1;i<=TENDENCYPARAMETER;i++){
+  int i=0;
+  for(i=1;i<TENDENCYPARAMETER;i++){
     tabuList[i-1][0]=tabuList[i][0];
     tabuList[i-1][1]=tabuList[i][1];
   }
-  // tabuList[i][0]=0;
-  // tabuList[i][1]=0;
 }
 void clearTabuList(){
   int i;
