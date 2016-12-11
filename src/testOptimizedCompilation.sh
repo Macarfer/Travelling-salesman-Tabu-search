@@ -1,0 +1,1 @@
+gcc *.c -lm -O0 -funroll-loops -foptimize-sibling-calls -ftree-vectorize -finline-functions -funswitch-loops -fpredictive-commoning -falign-loops  -fdelete-null-pointer-checks -falign-functions -falign-jumps -o main

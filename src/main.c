@@ -9,6 +9,7 @@ int main(int argc, char const *argv[]) {
     case 2:
     initWithoutRandom(argv[1]);
     generateGreedyInitialSolution();
+    // generateInitialSolution();
     run();
     break;
     case 3:
