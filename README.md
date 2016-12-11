@@ -1,3 +1,5 @@
+**This is a description of the Optimized Branch! If you want to see the things explained here, go there! ;)**
+
 # Tabu search  
 Tabu search algorithm following given guidelines.
 
