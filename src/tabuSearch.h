@@ -2,12 +2,19 @@
 #include <math.h>
 #include <time.h>
 
+// #define MAXITERATIONS 10000
+// #define TENDENCYPARAMETER 13
+// #define MAXITERATIONSWITHOUTIMPROVEMENT 17
+// #define MAX_INT 2147483647
+// #define BEST_SOLUTIONS_SIZE 30
+// #define MU 1.01
+
 #define MAXITERATIONS 10000
-#define TENDENCYPARAMETER 12
-#define MAXITERATIONSWITHOUTIMPROVEMENT 20
+#define TENDENCYPARAMETER 13
+#define MAXITERATIONSWITHOUTIMPROVEMENT 27
 #define MAX_INT 2147483647
-#define BEST_SOLUTIONS_SIZE 30
-#define MU 5000
+#define BEST_SOLUTIONS_SIZE 7
+#define MU 1.009
 
 void initWithoutRandom(const char * path);
 void initWithRandom(const char * path,const char * path2);

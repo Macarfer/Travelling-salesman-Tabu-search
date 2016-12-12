@@ -90,6 +90,7 @@ actualSolution[0]=0;
   actualSolution[DIMENSION]=0;
 solutionNumber+=1;
 calculateInitialDistance();
+minimalDistance=actualDistance;
 }
 
 void generateGreedyInitialSolution(){
@@ -119,8 +120,11 @@ void generateGreedyInitialSolution(){
   //   }
   //   printf("\n");
   // }
+  actualSolution[DIMENSION]=0;
+  printArray(actualSolution,DIMENSION);
   // getchar();
   calculateInitialDistance();
+  minimalDistance=actualDistance;
 }
 
 void generateGreedyRestartSolution(){
@@ -144,6 +148,8 @@ void generateGreedyRestartSolution(){
     freq[index0][actualSolution[asignations]]+=1;
     actualDistance = MAX_INT;
   }
+  
+  actualSolution[DIMENSION]=0;
 
   printActualSolution();
   // int i,j;
@@ -154,7 +160,7 @@ void generateGreedyRestartSolution(){
   //   printf("\n");
   // }
   // getchar();
-  calculateInitialDistance();
+  //calculateInitialDistance();
 }
 
 void calculateInitialDistance(){
@@ -166,7 +172,6 @@ void calculateInitialDistance(){
     actualDistance+=distanceMatrix[index01][index02];
   }
   newDistance=actualDistance;
-  minimalDistance=actualDistance;
 }
 
 int calculateDistance(int * vector){
@@ -281,27 +286,34 @@ void calculateNeighbors(){
        tabuList[tabuCount][1]=bestIndex1;
      }
      tabuCount++;
-
      printTabuList();
      if(iterationsWithoutImprovement == MAXITERATIONSWITHOUTIMPROVEMENT){
       printf("\n***************\nREINICIO: %d\n***************\n",restart);
-       clearTabuList();
-       if(restart%2==0){
+      clearTabuList();
+       if(restart%2!=0 || bestSolutionsActualSize==0){
         generateGreedyRestartSolution();
-        copyArray(solution,actualSolution,DIMENSION);
+        //printArray(actualSolution,DIMENSION);
+        calculateInitialDistance();
+        //copyArray(solution,actualSolution,DIMENSION);
       }else{
-        randomAux=((int) (floor(rand()*BEST_SOLUTIONS_SIZE)))%bestSolutionsActualSize;
-      //  printf("%d\n",randomAux);
+        randomAux=abs(((int) ((rand()*BEST_SOLUTIONS_SIZE)))%bestSolutionsActualSize);
+        // printf("%d\n",randomAux);
+        // printArray(bestSolutions[0],DIMENSION);
         copyArray(actualSolution,bestSolutions[randomAux],DIMENSION);
+        //actualSolution[DIMENSION]=0;
+        //calculateInitialDistance();
+        copyArray(solution,bestSolutions[randomAux],DIMENSION);
+        calculateInitialDistance();
         actualDistance= bestSolutionsDistance[randomAux];
        }
+      srand(time(NULL));
        iterationsWithoutImprovement=0;
        copyArray(vector,actualSolution,DIMENSION);
        copyArray(bestNeighbor,actualSolution,DIMENSION);
-       actualDistance=minimalDistance;
-       tabuCount=0;
+       //actualDistance=minimalDistance;
+      tabuCount=0;
        restart++;
-       reinitializeTabuMatrix();
+      reinitializeTabuMatrix();
      }
      printf("\n");
   }
@@ -312,11 +324,15 @@ void addTobestSolutions(){
   for(index=0;index<BEST_SOLUTIONS_SIZE;index++){
     if(bestSolutionsDistance[index] < actualDistance){
       //bestSolutionsActualSize=(bestSolutionsActualSize+1)%BEST_SOLUTIONS_SIZE;
+      if(index==0){
+        copyArray(solution,bestNeighbor,DIMENSION);
+        minimalDistance=actualDistance;
+      }
       bestSolutionsActualSize<BEST_SOLUTIONS_SIZE ? bestSolutionsActualSize++ : bestSolutionsActualSize;
       bestSolutionsDistance[index]=actualDistance;
       copyArray(bestSolutions[index],bestNeighbor,DIMENSION);
-    //  printArray(bestSolutions[index],DIMENSION);
-      // getchar();
+      // printArray(bestSolutions[index],DIMENSION);
+      //  getchar();
     }
   }
 }
@@ -340,8 +356,9 @@ short isvalueinarray(int val, int *arr, int size){
 
 void copyArray(int * hostArray,int * array,int size){
   int i=0;
-  for(i=0;i<=size;i++)
+  for(i=0;i<size;i++)
     hostArray[i]=array[i];
+  hostArray[DIMENSION]=0;
 }
 
 float calculateRandom(){
