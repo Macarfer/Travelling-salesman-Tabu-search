@@ -57,7 +57,7 @@ void run(){
   printf("\tCOSTE (km): %d\n\n",newDistance);
   calculateNeighbors();
   printf("\nMEJOR SOLUCION: \n");
-  copyArray(actualSolution,solution,numberOfCities);
+  copyArray(actualSolution,solution,DIMENSION);
   printActualSolution();
   printf("\tCOSTE (km): %d\n\tITERACION: %d\n",minimalDistance,solIterations);
 }
@@ -117,7 +117,7 @@ void generateGreedyInitialSolution(){
   actualSolution[DIMENSION]=0;
   printArray(actualSolution,DIMENSION);
   calculateInitialDistance();
-  minimalDistance=actualDistance;
+  //minimalDistance=actualDistance;
 }
 
 void generateGreedyRestartSolution(){
@@ -243,7 +243,7 @@ void calculateNeighbors(){
      copyArray(actualSolution,bestNeighbor,DIMENSION);
      copyArray(vector,actualSolution,DIMENSION);
      if(actualDistance < minimalDistance){
-      copyArray(solution,actualSolution,DIMENSION);
+      copyArray(solution,bestNeighbor,DIMENSION);
       solIterations=iterations;
       minimalDistance=actualDistance;
       iterationsWithoutImprovement=0;
@@ -277,11 +277,11 @@ void calculateNeighbors(){
        if(restart%2!=0 || bestSolutionsActualSize==0){
         generateGreedyRestartSolution();
         calculateInitialDistance();
-        copyArray(solution,actualSolution,DIMENSION);
+        //copyArray(solution,actualSolution,DIMENSION);
       }else{
         randomAux=abs(((int) ((rand()*BEST_SOLUTIONS_SIZE)))%bestSolutionsActualSize);
         copyArray(actualSolution,bestSolutions[randomAux],DIMENSION);
-        copyArray(solution,bestSolutions[randomAux],DIMENSION);
+      //  copyArray(solution,bestSolutions[randomAux],DIMENSION);
         calculateInitialDistance();
         actualDistance= bestSolutionsDistance[randomAux];
        }
@@ -300,11 +300,11 @@ void calculateNeighbors(){
 void addTobestSolutions(){
   int index;
   for(index=0;index<BEST_SOLUTIONS_SIZE;index++){
-    if(bestSolutionsDistance[index] < actualDistance){
-      if(index==0){
-        copyArray(solution,bestNeighbor,DIMENSION);
-        minimalDistance=actualDistance;
-      }
+    if(bestSolutionsDistance[index] <= actualDistance){
+        if(index==0){
+          copyArray(solution,bestNeighbor,DIMENSION);
+          minimalDistance=actualDistance;
+        }
       bestSolutionsActualSize<BEST_SOLUTIONS_SIZE ? bestSolutionsActualSize++ : bestSolutionsActualSize;
       bestSolutionsDistance[index]=actualDistance;
       copyArray(bestSolutions[index],bestNeighbor,DIMENSION);
