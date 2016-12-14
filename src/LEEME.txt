@@ -1,5 +1,0 @@
-# Leeme
-*  O programa está feito sen ningún ide polo tanto non hai nada que referir no caso disto.
-*  Se se compila coa opción **-O3** de **gcc** remata en 7s e algo, se non se compila con algunha opción de optimización tarda 46s.
-*  A execución realízase da seguinte forma:
-```nomeDoexecutable rutaAoArquivoDeDistancias [rutaAoArquivoDeAleatorios]```  
